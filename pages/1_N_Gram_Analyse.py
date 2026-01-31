@@ -348,6 +348,10 @@ st.write(
     "aggregiert Leistungswerte (Impressions, Klicks, Kosten, Conversions, Wert) "
     "und exportiert eine Excel-Datei mit einem Sheet pro Upload."
 )
+st.markdown(
+    "Erwartete Spalten (exakt): "
+    "`Suchbegriff`, `Impressionen`, `Klicks`, `Kosten`, `Conversions`, `Conv.-Wert`."
+)
 
 uploaded_files = st.file_uploader(
     "Google Ads CSV(s) hochladen",
@@ -427,7 +431,17 @@ if uploaded_files:
                     ws = writer.sheets[sheet]
                     apply_number_formats_and_rules(ws, len(export_df))
                 except Exception as e:
-                    st.error(f"Fehler bei {up.name}: {e}")
+                    msg = str(e)
+                    if "Fehlende Spalten" in msg:
+                        st.error(
+                            f"Datei '{up.name}' hat nicht die erwarteten Spalten. "
+                            "Bitte prüfe die Überschriften."
+                        )
+                    else:
+                        st.error(
+                            f"Datei '{up.name}' konnte nicht verarbeitet werden. "
+                            f"Details: {msg}"
+                        )
 
         out_buf.seek(0)
         progress.progress(1.0)
