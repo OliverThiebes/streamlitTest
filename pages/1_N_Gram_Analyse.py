@@ -1,6 +1,7 @@
 import io
 import re
 import csv
+import sys
 from typing import Dict, List, Tuple
 from datetime import datetime
 
@@ -62,6 +63,12 @@ def read_google_ads_csv_bytes(raw: bytes) -> pd.DataFrame:
     delimiter = sniff_delimiter(sample)
 
     from io import StringIO
+
+    # CSV field-size limit (Streamlit Cloud can hit default limits with long query fields)
+    try:
+        csv.field_size_limit(sys.maxsize)
+    except OverflowError:
+        csv.field_size_limit(2**31 - 1)
 
     df = pd.read_csv(
         StringIO(text),
